@@ -22,7 +22,7 @@ public class ConnectDB {
 	
 	
 	static Connection conn = null;
-	//static Statement stmt = null;
+	
 	public static Connection getconnect() throws SQLException{
 	    try {
 	        Class.forName("com.mysql.jdbc.Driver");
