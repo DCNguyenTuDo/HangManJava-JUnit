@@ -2,14 +2,23 @@ package udo.edu.game;
 
 
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Random;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import udo.edu.dbconnect.ConnectDB;
+//import udo.edu.dbconnect.ConnectDB.Connect;
+
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.GroupLayout;
 import javax.swing.LayoutStyle.ComponentPlacement;
+
+   
+
 
 /**
  *
@@ -44,8 +53,12 @@ public class Game extends javax.swing.JFrame {
 
     public void initGame() {
         //Lấy dữ liệu từ CSDL
-        ResultSet rs = ConnectDB.getResultset("select * from game");
-        try {
+        
+    	try(Connection conn = ConnectDB.getconnect();
+    			    Statement stmt = ConnectDB.getconnect().createStatement();
+    		){
+            	ResultSet rs = stmt.executeQuery("Select * from game");    
+    			
             while (rs.next()) {
                 //Add tất cả câu trả lời vào chuỗi answertotal + "|" 
                 //Để thực hiện việc tách chuỗi để random
@@ -76,7 +89,7 @@ public class Game extends javax.swing.JFrame {
     }
     //Load câu hỏi
 
-    public void loadquestion() {
+    public void loadquestion()  {
         initGame();
         //Cho phép trả lời sai tối đa 9 lần
         error = 9;
@@ -226,13 +239,13 @@ private void txtkeyKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_t
 private void btnokActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnokActionPerformed
     //Bắt lỗi để trống
     if (txtkey.getText().equals("")) {
-        JOptionPane.showMessageDialog(this, "Please enter one character !!!");
+        JOptionPane.showMessageDialog(this, "Please enter one letter !!!");
         txtkey.requestFocus();
         return;
     }
     //Chỉ được phép nhập 1 kí tự
     if (txtkey.getText().length() > 1) {
-        JOptionPane.showMessageDialog(this, "Only one character is allowed");
+        JOptionPane.showMessageDialog(this, "Only one letter is allowed");
         txtkey.setText("");
         txtkey.requestFocus();
         return;
