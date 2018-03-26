@@ -22,23 +22,20 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 
 /**
  *
- * @author Ninhc1010l, DC Nguyen - edited by DCNguyen
+ * @author Ninhc1010l, DCNguyen - edited by DCNguyen
  */
 public class Game extends javax.swing.JFrame {
-    //Lấy tất cả câu tả lời trong CSDL ra 1 chuỗi để random
+    //Get all questions then take one randomly
 
-    String answertotal = "";
-    //Lấy tất cả câu hỏi trong CSDL ra 1 chuỗi để random
-    String questiontotal = "";
-    //Biến error để kiểm tra số lần nhập từ sai. nếu error=0 =>> Thua
-    int error;
-    //Câu trả lời sau khi random
-    String answer = "";
-    //Câu hỏi sau khi random
-    String question = "";
-    //Mảng kiểu char độ rộng bằng length của question nhưng các kí tự hiện lên sẽ là *** or --- 
-    //Để người chơi đoán 
-    char[] cAnswer;
+    public String answertotal = "";
+    
+    public String questiontotal = "";
+    //Use variable error to check false guesses. error ==0 ->Lose
+    public int error;
+    public String answer = "";
+    public String question = "";
+    //Char array with its length = the length of answer. 
+    public char[] cAnswer;
     StringBuffer bs;
 
     /** Creates new form game */
@@ -49,52 +46,50 @@ public class Game extends javax.swing.JFrame {
         loadquestion();
         setLocationRelativeTo(this);
     }
-    //Lấy câu hỏi & câu trả lời rồi gán vào các biến
-
+    
     public void initGame() {
-        //Lấy dữ liệu từ CSDL
-        
+        //Get data from the database
+        // try block (with resources) will automatically close connections after using them //From Java 7
     	try(Connection conn = ConnectDB.getconnect();
-    			    Statement stmt = ConnectDB.getconnect().createStatement();
+    		Statement stmt = ConnectDB.getconnect().createStatement();
     		){
             	ResultSet rs = stmt.executeQuery("Select * from game");    
     			
             while (rs.next()) {
-                //Add tất cả câu trả lời vào chuỗi answertotal + "|" 
-                //Để thực hiện việc tách chuỗi để random
+                //Add all the answers into answertotal 
                 answertotal += rs.getString("Answer");
                 answertotal += "|";
-                //Add tất cả câu hỏi lời vào chuỗi questiontotal
+                //Add all the questions into questiontotal
                 questiontotal += rs.getString("Question");
                 questiontotal += "|";
             }
-            //Khai báo 2 mảng kiểu String để tách 2 chuỗi question và answer
+            //Create 2-dimensional array to split answers and questions
             String[] atemp;
             String[] qtemp;
             atemp = answertotal.split("\\|");
             qtemp = questiontotal.split("\\|");
-            //Thực hiện random cau hỏi & câu trả lời
+            //Get a question and its answer randomly
             Random randomGenerator = new Random();
             int randomInt = randomGenerator.nextInt(atemp.length);
-            //Lấy ra câu hỏi và câu trả lời sau khi random
+            //Get questions and answers randomly
             answer = new String(atemp[randomInt]);
             question = new String(qtemp[randomInt]);
-            //In ra câu hỏi
+            //Print a question
             lblquestion.setText(question);
-            //Set độ rộng cho mảng answer (**** or ----)
+            //Set the length of an answer
             cAnswer = new char[answer.length()];
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-    //Load câu hỏi
+            }
+         }
+    
+    //Load question
 
     public void loadquestion()  {
         initGame();
-        //Cho phép trả lời sai tối đa 9 lần
+        //Maximum 9 wrong guesses (times) are allowed
         error = 9;
         lblstatus.setText("You have: " + error + " times left");
-        //Gán mảng answer bằng ***** hoặc ---- (mình dùng ....) :D
         for (int i = 0; i < cAnswer.length; i++) {
             cAnswer[i] = '*';
         }
@@ -232,39 +227,32 @@ public class Game extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-private void txtkeyKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtkeyKeyReleased
-    //
-}//GEN-LAST:event_txtkeyKeyReleased
-
-private void btnokActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnokActionPerformed
-    //Bắt lỗi để trống
+	private void txtkeyKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtkeyKeyReleased
+	    //
+	}//GEN-LAST:event_txtkeyKeyReleased
+	
+	private void btnokActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnokActionPerformed
+	    //Empty detected
     if (txtkey.getText().equals("")) {
         JOptionPane.showMessageDialog(this, "Please enter one letter !!!");
         txtkey.requestFocus();
         return;
     }
-    //Chỉ được phép nhập 1 kí tự
+    //Only one letter is allowed
     if (txtkey.getText().length() > 1) {
         JOptionPane.showMessageDialog(this, "Only one letter is allowed");
         txtkey.setText("");
         txtkey.requestFocus();
         return;
     }
-    //khai báo mảng k để kiểm tra xem từ khóa nhập vào nếu xuất hiện thì ở vị trí nào
-    //Để cho chữ cái đấy hiện ra. VD answer của mình là hello (*****)
-    //khi nhập vào kí tự 'e' =>> e xuất hiện tại k[1]. ->> settext ->> *e***
+    //Check the position where the keyword appears
     int[] k = new int[answer.length()];
-    //Biến count kiểm tra xem từ khóa nhập vào có xuất hiện trong câu trả lời không
-    //Nếu count==0 =>> ko xuất hiện
+    //if count==0 =>> the character entered is not a keyword
     int count = 0;
-    //Tách answer thành mảng để kiểm tra xem có chứa từ khóa nhập vào ko
+    //Convert answer to array to check whether it contains keywords
     char[] c = answer.toCharArray();
-    //Từ khóa nhập vào từ bạn phím
     char keyword = txtkey.getText().charAt(0);
-    //Dùng vòng lặp duỵêt đến hết chuỗi answer xem answer có chứa từ khóa ko
-    //Bình thường có thể kiểm tra luôn ko cần vòng lặp.
-    //Tuy nhiên vì answer có thể chứa nhiều từ khóa giống nhau nên phải lặp
-    //VD hello khi chứa 2 từ khóa 'l' nếu ko lặp nó chỉ hiển thị ddc kí tự 'l' đầu tiên
+    //Use loop to check whether it contains character in an answer string
     for (int i = 0; i < c.length; i++) {
         if (Character.toLowerCase(c[i])==Character.toLowerCase(keyword)) {
             //nếu từ khóa xuất hiện trong answer ->> vị trí xuất hiện =i
@@ -272,48 +260,47 @@ private void btnokActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:e
             count++;
         }
     }
-    //Nếu count =0 ->> answer ko chứa từ khóa ->> lỗi giảm xuống 1 lần ->> Bắt đầu treo cổ :|
+    //count ==0, the times left must be reduced (one)
     if (count == 0) {
         error--;
-      // lbltreo.setIcon(new ImageIcon(this.getClass().getResource("0.jpg)));
         lblstatus.setText("You have: " + error + "times left");
     } else {
-        //Nếu ko thì dùng hàm setcharat của Stringbuffer để hiển thị chữ cái xuất hiện trong answer
-        //Rồi Hiển thị chuỗi mới lên
+        
+        //display the new string
         bs = new StringBuffer(lblAnswer.getText());
         for (int i = 0; i < count; i++) {
             bs.setCharAt(k[i], keyword);
         }
         lblAnswer.setText(bs.toString());
     }
-    //Nếu error==0 ->> thua ->>Load câu hỏi mới
+    //Error == 0 -> Lose, then load a new game
     if (error < 1) {
         lblAnswer.setText(answer);
         JOptionPane.showMessageDialog(this, "You Lose !!!");
-        //lbltreo.setIcon(null);
+        
         loadquestion();
     }
-    //Nếu Chuỗi hiện thị ra mà = answer ->> Win ->>Load câu hỏi mới
+    //if lblAnswer.getText = answer -> Win , load a new game
     if (lblAnswer.getText().equalsIgnoreCase(answer)) {
         JOptionPane.showMessageDialog(this, "You Win !!!");
-        //lbltreo.setIcon(null);
+        
         loadquestion();
     }
     txtkey.setText("");
     txtkey.requestFocus();
-}//GEN-LAST:event_btnokActionPerformed
+	}	//GEN-LAST:event_btnokActionPerformed
 
-private void formKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyReleased
-}//GEN-LAST:event_formKeyReleased
-
-private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-    loadquestion();
-    txtkey.requestFocus();
-}//GEN-LAST:event_jButton1ActionPerformed
-
-private void txtkeyKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtkeyKeyPressed
-    //
-}//GEN-LAST:event_txtkeyKeyPressed
+	private void formKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyReleased
+	}//GEN-LAST:event_formKeyReleased
+	
+	private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+	    loadquestion();
+	    txtkey.requestFocus();
+	}//GEN-LAST:event_jButton1ActionPerformed
+	
+	private void txtkeyKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtkeyKeyPressed
+	    //
+	}//GEN-LAST:event_txtkeyKeyPressed
 
     private void txtkeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtkeyActionPerformed
         // TODO add your handling code here:
@@ -324,11 +311,7 @@ private void txtkeyKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tx
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
+       
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -345,9 +328,7 @@ private void txtkeyKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tx
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(Game.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
-
-        /* Create and display the form */
+       
         java.awt.EventQueue.invokeLater(new Runnable() {
 
             public void run() {
@@ -355,7 +336,7 @@ private void txtkeyKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tx
             }
         });
     }
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+    
     private javax.swing.JButton btnok;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
@@ -364,5 +345,5 @@ private void txtkeyKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tx
     private javax.swing.JLabel lblquestion;
     private javax.swing.JLabel lblstatus;
     private javax.swing.JTextField txtkey;
-    // End of variables declaration//GEN-END:variables
+    
 }

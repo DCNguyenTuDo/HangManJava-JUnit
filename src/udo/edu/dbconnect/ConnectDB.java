@@ -11,7 +11,7 @@ import java.sql.Statement;
 
 /**
  *
- * @author Ninh1010l, DC Nguyen - edited by DCNguyen
+ * @author Ninh1010l, DCNguyen - edited by DCNguyen
  */
 public class ConnectDB {
 	
@@ -31,6 +31,7 @@ public class ConnectDB {
 	    } catch (Exception ex) {
 	        ex.printStackTrace();
 	    }
+	    
 	    return conn;
 	    
 	}
