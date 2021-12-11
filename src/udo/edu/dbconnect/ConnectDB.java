@@ -21,10 +21,11 @@ public class ConnectDB {
 	private static final String CONN_STRING ="jdbc:mysql://localhost/hangman";
 	
 	
-	static Connection conn = null;
+	private static Connection conn = null;
 	
-	public static Connection getconnect() throws SQLException{
+	public synchronized static Connection getconnect() throws SQLException{
 	    try {
+		if(null != conn && conn.isValid(1000)) return conn;
 	        Class.forName("com.mysql.jdbc.Driver");
 	        conn= DriverManager.getConnection(CONN_STRING, USERNAME, PASSWORD);
 	        return conn;
@@ -35,7 +36,7 @@ public class ConnectDB {
 	    return conn;
 	    
 	}
-	}
+}
    
 	
 
